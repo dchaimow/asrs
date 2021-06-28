@@ -11,8 +11,16 @@ Useage:
 
 asrs.py dicomPath seriesNumber \[ref1.nii slab1.nii\]
 
-Finds the slab parameters based on a current Reference scan located inside dicomPath with series number seriesNumber and previously acquired reference scan ref1.nii and slab slab1.nii. If not provided, ref1.nii and slab1.nii from the current disrectory will be used.
+Finds the slab parameters based on a current Reference scan located inside dicomPath with series number seriesNumber and previously acquired reference scan ref1.nii and slab slab1.nii. If not provided, ref1.nii and slab1.nii from the current directory will be used.
 
 asrs.py scan.nii
 
 Calculates the Siemens protocol positioning parameters for the data in scan.nii
+
+Requirements:
+- nipype
+- nibabel
+- scipy
+- numpy
+- dcm2niix
+- fsl
