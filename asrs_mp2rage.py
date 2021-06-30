@@ -37,7 +37,7 @@ if __name__ == "__main__":
         slab1 = sys.argv[6]
         inv2_ses2 = loadFromDicomExport(dicomExportPath, seriesNumberINV2)
         uni_ses2 = loadFromDicomExport(dicomExportPath, seriesNumberUNI)
-    elif len(sys.argc)==8:
+    elif len(sys.argv)==8:
         dicomExportPathINV2 = sys.argv[1]
         seriesNumberINV2 = sys.argv[2]
         dicomExportPathUNI = sys.argv[3]
