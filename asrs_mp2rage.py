@@ -1,5 +1,6 @@
 import asrs
 from nipype.interfaces.fsl import BET, ImageMaths
+import sys
 
 def generate_mp2rage_refs(inv2_ses1, uni_ses1,inv2_ses2, uni_ses2):
     FSLCommand.set_default_output_type('NIFTI')
