@@ -1,5 +1,5 @@
 import asrs
-from nipype.interfaces.fsl import BET, ImageMaths
+from nipype.interfaces.fsl import BET, ImageMaths, FSLCommand
 import sys
 
 def generate_mp2rage_refs(inv2_ses1, uni_ses1,inv2_ses2, uni_ses2):
