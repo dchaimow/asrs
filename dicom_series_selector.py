@@ -24,12 +24,12 @@ def interactive_menu(stdscr, sorted_acquisitions):
     
     # Build a flat list of series with their info
     menu_items = []
-    for acq_num, series_list in sorted_acquisitions:
-        # Add acquisition header
-        if acq_num is not None:
-            menu_items.append(('header', f"Acquisition {acq_num}:", None, None))
+    for protocol_name, series_list in sorted_acquisitions:
+        # Add acquisition header (grouped by protocol)
+        if protocol_name is not None:
+            menu_items.append(('header', f"Protocol: {protocol_name}", None, None))
         else:
-            menu_items.append(('header', "No Acquisition Number:", None, None))
+            menu_items.append(('header', "No Protocol Name:", None, None))
         
         # Sort series within acquisition by Series Number
         sorted_series = sorted(series_list, key=lambda x: x[1][0][1].SeriesNumber)
@@ -156,19 +156,40 @@ def dicom_series_selector(dicom_dir, menu_type='simple'):
             series_uid = ds.SeriesInstanceUID
             series_dict[series_uid].append((file_path, ds))
 
-        # Group series by AcquisitionNumber
+        # Group series by AcquisitionDate and AcquisitionTime
         acquisition_groups = defaultdict(list)
         for series_uid, files in series_dict.items():
-            first_ds = files[0][1]
-            acquisition_number = getattr(first_ds, 'AcquisitionNumber', None)
-            acquisition_groups[acquisition_number].append((series_uid, files))
+            # Sort files alphabetically to get consistent first file
+            sorted_files = sorted(files, key=lambda x: x[0])
+            first_ds = sorted_files[0][1]
+            acquisition_date = getattr(first_ds, 'AcquisitionDate', '')
+            acquisition_time = getattr(first_ds, 'AcquisitionTime', '')
+            protocol_name = getattr(first_ds, 'ProtocolName', None)
+            series_number = getattr(first_ds, 'SeriesNumber', 0)
+            
+            # Create a unique key for this acquisition: (date, time)
+            acquisition_key = (acquisition_date, acquisition_time)
+            acquisition_groups[acquisition_key].append({
+                'series_uid': series_uid,
+                'files': sorted_files,
+                'protocol_name': protocol_name,
+                'series_number': series_number
+            })
         
-        # Sort acquisitions and series within each acquisition
-        sorted_acquisitions = sorted(acquisition_groups.items(), key=lambda x: (x[0] is None, x[0]))
+        # Sort acquisitions by date/time, and series within each acquisition by series number
+        sorted_acquisitions = []
+        for (acq_date, acq_time), series_list in sorted(acquisition_groups.items()):
+            # Sort series within this acquisition by series number
+            sorted_series_list = sorted(series_list, key=lambda x: x['series_number'])
+            # Get protocol name from the first series (they should all be the same)
+            protocol_name = sorted_series_list[0]['protocol_name']
+            # Convert to (series_uid, files) tuples
+            series_tuples = [(s['series_uid'], s['files']) for s in sorted_series_list]
+            sorted_acquisitions.append((protocol_name, series_tuples))
         
         # Build a dictionary mapping series number to (series_uid, files)
         series_number_map = {}
-        for acq_num, series_list in sorted_acquisitions:
+        for protocol_name, series_list in sorted_acquisitions:
             for series_uid, files in series_list:
                 first_ds = files[0][1]
                 series_number = getattr(first_ds, 'SeriesNumber', None)
@@ -193,13 +214,13 @@ def dicom_series_selector(dicom_dir, menu_type='simple'):
                 menu_type = 'simple'
         
         if menu_type == 'simple':
-            # Display available series grouped by acquisition
+            # Display available series grouped by protocol
             print("Available DICOM Series:")
-            for acq_num, series_list in sorted_acquisitions:
-                if acq_num is not None:
-                    print(f"\nAcquisition {acq_num}:")
+            for protocol_name, series_list in sorted_acquisitions:
+                if protocol_name is not None:
+                    print(f"\nProtocol: {protocol_name}")
                 else:
-                    print(f"\nNo Acquisition Number:")
+                    print(f"\nNo Protocol Name:")
                 
                 # Sort series within acquisition by Series Number
                 sorted_series = sorted(series_list, key=lambda x: x[1][0][1].SeriesNumber)
