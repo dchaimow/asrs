@@ -49,7 +49,7 @@ def interactive_menu(stdscr, sorted_acquisitions):
             series_number = getattr(first_ds, 'SeriesNumber', 'N/A')
             series_description = getattr(first_ds, 'SeriesDescription', 'N/A')
             
-            display_text = f"  Series {series_number}: {series_description}"
+            display_text = f"  Series {series_number}: {series_description} [{len(files)}]"
             menu_items.append(('series', display_text, series_number, (series_uid, files)))
     
     current_row = 0
@@ -236,7 +236,7 @@ def dicom_series_selector(dicom_dir, menu_type='simple'):
                     series_number = getattr(first_ds, 'SeriesNumber', 'N/A')
                     series_description = getattr(first_ds, 'SeriesDescription', 'N/A')
                     
-                    print(f"  Series {series_number}: {series_description}")
+                    print(f"  Series {series_number}: {series_description} [{len(files)}]")
 
             # User selects a series by series number
             selection = input("\nSelect a series by series number (or 'r' to refresh, 'q' to quit): ")
