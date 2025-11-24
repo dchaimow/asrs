@@ -9,6 +9,18 @@ Python code that can be used to position an fMRI slab on Siemens scanners such t
 
 ## Usage:
 
+### Interactive GUI Mode (Simplified):
+
+`asrs_gui.py dicomExportPath`
+
+Simplified workflow for the common use case where you have:
+- `ref1.nii` and `slab1.nii` from session 1 in the current directory
+- A DICOM realtime export folder containing the reference scan from session 2
+
+The script will present an interactive menu to select the reference series from the DICOM export, then automatically compute the new slab positioning.
+
+### Command Line Mode:
+
 `asrs.py dicomPath seriesNumber [ref1.nii slab1.nii]`
 
 Finds the slab parameters based on a current Reference scan located inside dicomPath with series number seriesNumber and previously acquired reference scan ref1.nii and slab slab1.nii. If not provided, ref1.nii and slab1.nii from the current directory will be used.
@@ -34,3 +46,5 @@ will run the registration on the UNI images masked using a brainmask computed on
 - numpy
 - dcm2niix
 - fsl
+
+(will run in gfae container without further requirements)
