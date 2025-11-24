@@ -25,11 +25,21 @@ def interactive_menu(stdscr, sorted_acquisitions):
     # Build a flat list of series with their info
     menu_items = []
     for protocol_name, series_list in sorted_acquisitions:
-        # Add acquisition header (grouped by protocol)
+        # Get sequence name from first series
+        first_series_ds = series_list[0][1][0][1]
+        sequence_name = getattr(first_series_ds, 'SequenceName', None)
+        
+        # Add acquisition header (grouped by protocol) with sequence name
         if protocol_name is not None:
-            menu_items.append(('header', f"Protocol: {protocol_name}", None, None))
+            header = f"Protocol: {protocol_name}"
+            if sequence_name:
+                header += f" ({sequence_name})"
+            menu_items.append(('header', header, None, None))
         else:
-            menu_items.append(('header', "No Protocol Name:", None, None))
+            header = "No Protocol Name:"
+            if sequence_name:
+                header += f" ({sequence_name})"
+            menu_items.append(('header', header, None, None))
         
         # Sort series within acquisition by Series Number
         sorted_series = sorted(series_list, key=lambda x: x[1][0][1].SeriesNumber)
@@ -38,22 +48,8 @@ def interactive_menu(stdscr, sorted_acquisitions):
             first_ds = files[0][1]
             series_number = getattr(first_ds, 'SeriesNumber', 'N/A')
             series_description = getattr(first_ds, 'SeriesDescription', 'N/A')
-            sequence_name = getattr(first_ds, 'SequenceName', None)
-            protocol_name = getattr(first_ds, 'ProtocolName', None)
             
-            # Build the sequence/protocol info in parentheses
-            seq_protocol_info = []
-            if sequence_name:
-                seq_protocol_info.append(sequence_name)
-            if protocol_name:
-                seq_protocol_info.append(protocol_name)
-            
-            if seq_protocol_info:
-                additional_info = f" ({', '.join(seq_protocol_info)})"
-            else:
-                additional_info = ""
-            
-            display_text = f"  Series {series_number}: {series_description}{additional_info}"
+            display_text = f"  Series {series_number}: {series_description}"
             menu_items.append(('series', display_text, series_number, (series_uid, files)))
     
     current_row = 0
@@ -217,10 +213,20 @@ def dicom_series_selector(dicom_dir, menu_type='simple'):
             # Display available series grouped by protocol
             print("Available DICOM Series:")
             for protocol_name, series_list in sorted_acquisitions:
+                # Get sequence name from first series
+                first_series_ds = series_list[0][1][0][1]
+                sequence_name = getattr(first_series_ds, 'SequenceName', None)
+                
                 if protocol_name is not None:
-                    print(f"\nProtocol: {protocol_name}")
+                    header = f"\nProtocol: {protocol_name}"
+                    if sequence_name:
+                        header += f" ({sequence_name})"
+                    print(header)
                 else:
-                    print(f"\nNo Protocol Name:")
+                    header = "\nNo Protocol Name:"
+                    if sequence_name:
+                        header += f" ({sequence_name})"
+                    print(header)
                 
                 # Sort series within acquisition by Series Number
                 sorted_series = sorted(series_list, key=lambda x: x[1][0][1].SeriesNumber)
@@ -229,22 +235,8 @@ def dicom_series_selector(dicom_dir, menu_type='simple'):
                     first_ds = files[0][1]
                     series_number = getattr(first_ds, 'SeriesNumber', 'N/A')
                     series_description = getattr(first_ds, 'SeriesDescription', 'N/A')
-                    sequence_name = getattr(first_ds, 'SequenceName', None)
-                    protocol_name = getattr(first_ds, 'ProtocolName', None)
                     
-                    # Build the sequence/protocol info in parentheses
-                    seq_protocol_info = []
-                    if sequence_name:
-                        seq_protocol_info.append(sequence_name)
-                    if protocol_name:
-                        seq_protocol_info.append(protocol_name)
-                    
-                    if seq_protocol_info:
-                        additional_info = f" ({', '.join(seq_protocol_info)})"
-                    else:
-                        additional_info = ""
-                    
-                    print(f"  Series {series_number}: {series_description}{additional_info}")
+                    print(f"  Series {series_number}: {series_description}")
 
             # User selects a series by series number
             selection = input("\nSelect a series by series number (or 'r' to refresh, 'q' to quit): ")
